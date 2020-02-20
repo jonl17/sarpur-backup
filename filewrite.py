@@ -34,7 +34,7 @@ def save_one_movie(movie, parent_folder_name):
     )
     file_extension = ".txt"
 
-    directory = parent_folder_name + "/" + filename + "/"
+    directory = parent_folder_name + "/" + filename.encode("ascii", errors="ignore").decode() + "/"
 
     create_folder(directory)
 
@@ -48,37 +48,35 @@ def save_one_movie(movie, parent_folder_name):
     # make a json copy!
     create_json_copy(movie, directory)
 
-    f = open(save_location, "w")
-
-    f.write("Title: " + replace_icelandic(clean_special_characets(movie.title)))
-    f.write("\n\n")
-    f.write("Description: " + renderHTML(movie.content))
-    f.write(
-        "Image: "
-        + "\n"
-        + "url: "
-        + movie.image.url
-        + "\n"
-        + "Filename: "
-        + movie.image.filename
-        + "\n"
-        + "Title: "
-        + movie.image.title
-    )
-    f.write("\n\n")
-    f.write("Trailer URL: " + movie.trailerURL)
-    f.write("\n\n")
-    f.write("Playtime: " + movie.playtime)
-    f.write("\n\n")
-    f.write("Director: " + movie.director)
-    f.write("\n\n")
-    f.write("Producer: " + movie.producer)
-    f.write("\n\n")
-    if len(movie.otherCredits) > 0:
-        f.write("Other credits: \n")
-        for item in movie.otherCredits:
-            f.write(item.role + ": " + item.name + "\n")
-    f.close()
+    with open(save_location, "w", encoding="utf-8") as f:
+        f.write("Title: " + replace_icelandic(clean_special_characets(movie.title)))
+        f.write("\n\n")
+        f.write("Description: " + renderHTML(movie.content))
+        f.write(
+            "Image: "
+            + "\n"
+            + "url: "
+            + movie.image.url
+            + "\n"
+            + "Filename: "
+            + movie.image.filename
+            + "\n"
+            + "Title: "
+            + movie.image.title
+        )
+        f.write("\n\n")
+        f.write("Trailer URL: " + movie.trailerURL)
+        f.write("\n\n")
+        f.write("Playtime: " + movie.playtime)
+        f.write("\n\n")
+        f.write("Director: " + movie.director)
+        f.write("\n\n")
+        f.write("Producer: " + movie.producer)
+        f.write("\n\n")
+        if len(movie.otherCredits) > 0:
+            f.write("Other credits: \n")
+            for item in movie.otherCredits:
+                f.write(item.role + ": " + item.name + "\n")
 
 
 def save_one_image(url, path, image_filename):
@@ -90,16 +88,16 @@ def save_one_image(url, path, image_filename):
     resp = requests.get(image_url, stream=True)
 
     # Open a local file with wb ( write binary ) permission.
-    local_file = open(path + image_filename, "wb")
+    with open(path + replace_icelandic(image_filename), "wb") as local_file:
 
-    # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-    resp.raw.decode_content = True
+        # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+        resp.raw.decode_content = True
 
-    # Copy the response stream raw data to local image file.
-    shutil.copyfileobj(resp.raw, local_file)
+        # Copy the response stream raw data to local image file.
+        shutil.copyfileobj(resp.raw, local_file)
 
-    # Remove the image url response object.
-    del resp
+        # Remove the image url response object.
+        del resp
 
 
 def save_whole_year_to_folder(root_folder_name, movies):
